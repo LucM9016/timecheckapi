@@ -5,7 +5,7 @@ export default function handler(req, res) {
   
   // Verificar la clave API
   if (!VALID_KEYS.includes(key)) {
-    return res.status(403).json({ error: "- Prohibido -. Favor de contactar a @luc_m" });
+    return res.status(403).json({ error: "- Prohibido - Favor de contactar a @luc_m" });
   }
   
   // Verificar si la variable 'time' está presente
