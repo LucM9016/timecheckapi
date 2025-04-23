@@ -49,16 +49,16 @@ export default function handler(req, res) {
     const remainingSeconds = Math.abs(diff) / 1000;
     const minutesLeft = Math.floor(remainingSeconds / 60);
     const secondsLeft = Math.floor(remainingSeconds % 60);
-    const hoursLeft = Math.floor(remainingSeconds / 3600);
-    const daysLeft = Math.floor(remainingSeconds / 86400);
+    const hoursLeft = Math.floor(minutesLeft / 60); // Calcular las horas correctamente
+    const daysLeft = Math.floor(hoursLeft / 24); // Calcular los días correctamente
 
     // Generar el mensaje según el tiempo restante
     let remainingTime = '';
     
     if (daysLeft > 0) {
-      remainingTime = `${daysLeft} días, ${hoursLeft} horas, ${minutesLeft} minutos y ${secondsLeft} segundos`;
+      remainingTime = `${daysLeft} días, ${hoursLeft % 24} horas, ${minutesLeft % 60} minutos y ${secondsLeft} segundos`;
     } else if (hoursLeft > 0) {
-      remainingTime = `${hoursLeft} horas, ${minutesLeft} minutos y ${secondsLeft} segundos`;
+      remainingTime = `${hoursLeft} horas, ${minutesLeft % 60} minutos y ${secondsLeft} segundos`;
     } else if (minutesLeft > 0) {
       remainingTime = `${minutesLeft} minutos y ${secondsLeft} segundos`;
     } else {
