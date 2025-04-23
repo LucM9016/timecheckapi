@@ -36,6 +36,9 @@ export default function handler(req, res) {
     target.setDate(target.getDate() + 1);
   }
 
+  console.log(`Current time: ${now}`);
+  console.log(`Target time: ${target}`);
+
   const isFuture = target > now;
 
   if (isFuture) {
@@ -48,6 +51,9 @@ export default function handler(req, res) {
     const secondsLeft = Math.floor(remainingSeconds % 60);
     const hoursLeft = Math.floor(remainingSeconds / 3600);
     const daysLeft = Math.floor(remainingSeconds / 86400);
+
+    console.log(`Remaining time in seconds: ${remainingSeconds}`);
+    console.log(`Remaining time (days, hours, minutes, seconds): ${daysLeft} días, ${hoursLeft} horas, ${minutesLeft} minutos y ${secondsLeft} segundos`);
 
     // Generar el mensaje según el tiempo restante
     let remainingTime = '';
