@@ -14,7 +14,7 @@ export default function handler(req, res) {
   }
   
   // Verificar el formato de la hora (acepta tanto ":" como ";" como separador)
-  const match = time.match(/^(\d{1,2})[:;](\d{1,2})[:;](\d{1,2})(\/\+1)?$/);
+  const match = time.match(/^(\d{1,2})[:](\d{1,2})[:](\d{1,2})(\/\+1)?$/);
   if (!match) {
     return res.status(400).json({ error: "Formato de tiempo inválido. Use HH:MM:SS o HH;MM;SS/+1" });
   }
