@@ -40,13 +40,11 @@ export default function handler(req, res) {
     target.setDate(target.getDate() + 1);
   }
 
-  const isFuture = target > now;
-
-  // Si el tiempo ya ha llegado o está por llegar (en el futuro)
-  if (isFuture) {
+  // Si la fecha es futura, devuelve true
+  if (target > now) {
     return res.status(200).json({ result: true });
   } else {
-    // Si el tiempo ya pasó, calcula cuánto falta
+    // Si ya pasó, calcula cuánto falta
     const diff = target - now; // Diferencia en milisegundos
     const remainingSeconds = Math.abs(diff) / 1000;
     const minutesLeft = Math.floor(remainingSeconds / 60);
