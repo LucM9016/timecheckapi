@@ -1,9 +1,3 @@
 {
-  "version": 2,
-  "routes": [
-    {
-      "src": "/timecheck",
-      "dest": "/api/timecheck.js"
-    }
-  ]
+  "version": 2
 }
