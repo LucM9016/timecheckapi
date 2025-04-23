@@ -23,7 +23,7 @@ export default function handler(req, res) {
   const hour = parseInt(match[1], 10);
   const minute = parseInt(match[2], 10);
   const second = parseInt(match[3], 10);
-  const nextDay = !!match[4];
+  const nextDay = !!match[4];  // Si tiene '/+1', será true, sino false.
 
   const now = new Date();
   const target = new Date(
@@ -35,7 +35,7 @@ export default function handler(req, res) {
     second
   );
 
-  // Si el tiempo es del día siguiente, ajusta la fecha
+  // Si es para el siguiente día, ajusta la fecha
   if (nextDay) {
     target.setDate(target.getDate() + 1);
   }
@@ -44,13 +44,15 @@ export default function handler(req, res) {
 
   // Si el tiempo ya ha llegado o está por llegar (en el futuro)
   if (isFuture) {
-    // Si el tiempo aún no ha pasado, calcula cuánto falta
+    return res.status(200).json({ result: true });
+  } else {
+    // Si el tiempo ya pasó, calcula cuánto falta
     const diff = target - now; // Diferencia en milisegundos
     const remainingSeconds = Math.abs(diff) / 1000;
     const minutesLeft = Math.floor(remainingSeconds / 60);
     const secondsLeft = Math.floor(remainingSeconds % 60);
-    const hoursLeft = Math.floor(minutesLeft / 60); // Calcular las horas correctamente
-    const daysLeft = Math.floor(hoursLeft / 24); // Calcular los días correctamente
+    const hoursLeft = Math.floor(remainingSeconds / 3600);
+    const daysLeft = Math.floor(remainingSeconds / 86400);
 
     // Generar el mensaje según el tiempo restante
     let remainingTime = '';
@@ -69,8 +71,5 @@ export default function handler(req, res) {
       result: false,
       remaining: remainingTime
     });
-  } else {
-    // Si el tiempo ya pasó
-    return res.status(200).json({ result: true });
   }
 }
