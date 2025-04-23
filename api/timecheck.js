@@ -5,19 +5,19 @@ export default function handler(req, res) {
   
   // Verificar la clave API
   if (!VALID_KEYS.includes(key)) {
-    return res.status(403).json({ error: "- Prohibido - Favor de contactar a @luc_m" });
+    return res.status(403).json({ result: "ERROR - Prohibido - Favor de contactar a @luc_m" });
   }
   
   // Verificar si la variable 'time' está presente
   if (!time) {
-    return res.status(400).json({ error: "Parámetro 'time' es requerido" });
+    return res.status(400).json({ result: "ERROR - Parámetro 'time' es requerido" });
   }
   
   // Verificar el formato de la hora (ahora permite números de un solo dígito sin ceros iniciales)
   const match = time.match(/^(\d{1,2}):(\d{1,2}):(\d{1,2})$/);
   if (!match) {
     return res.status(400).json({ 
-      error: "Formato de tiempo inválido. Use HH:MM:SS",
+      result: "ERROR - Formato de tiempo inválido. Use HH:MM:SS",
       receivedTime: time
     });
   }
@@ -30,7 +30,7 @@ export default function handler(req, res) {
   // Validar los rangos de horas, minutos y segundos
   if (hour < 0 || hour > 23 || minute < 0 || minute > 59 || second < 0 || second > 59) {
     return res.status(400).json({ 
-      error: "Valores de tiempo fuera de rango. Horas(0-23), Minutos(0-59), Segundos(0-59)"
+      result: "ERROR - Valores de tiempo fuera de rango. Horas(0-23), Minutos(0-59), Segundos(0-59)"
     });
   }
   
