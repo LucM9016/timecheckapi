@@ -13,7 +13,7 @@ export default function handler(req, res) {
     return res.status(400).json({ error: "Parámetro 'time' es requerido" });
   }
   
-  // Verificar el formato de la hora
+  // Verificar el formato de la hora (ahora permite números de un solo dígito sin ceros iniciales)
   const match = time.match(/^(\d{1,2}):(\d{1,2}):(\d{1,2})$/);
   if (!match) {
     return res.status(400).json({ 
@@ -37,38 +37,69 @@ export default function handler(req, res) {
   // Comprobar si nextDay está establecido a true (acepta 'true', '1', 'yes')
   const isNextDay = nextDay === 'true' || nextDay === '1' || nextDay === 'yes';
   
-  // Obtener la fecha y hora actual en CDMX (UTC-6)
-  const now = new Date();
+  // Usando directamente Date.now() para evitar problemas con zonas horarias del servidor
+  const nowMs = Date.now();
   
-  // Ajustar a la zona horaria de CDMX (UTC-6)
-  const cdmxOffset = -6 * 60; // CDMX está en UTC-6 (en minutos)
-  const utcOffset = now.getTimezoneOffset(); // Diferencia entre hora local del servidor y UTC (en minutos)
-  const totalOffset = utcOffset + cdmxOffset; // Diferencia total a aplicar
+  // Obtener fecha actual en CDMX (UTC-6)
+  // Crear la fecha de hoy en UTC
+  const nowUtc = new Date(nowMs);
   
-  // Crear la fecha actual ajustada a CDMX
-  const cdmxNow = new Date(now.getTime() + totalOffset * 60 * 1000);
+  // Ajustar a CDMX (UTC-6)
+  // 1. Obtener la fecha en UTC
+  const year = nowUtc.getUTCFullYear();
+  const month = nowUtc.getUTCMonth();
+  const day = nowUtc.getUTCDate();
+  const currentHour = nowUtc.getUTCHours();
+  const currentMinute = nowUtc.getUTCMinutes();
+  const currentSecond = nowUtc.getUTCSeconds();
   
-  // Crear la fecha objetivo en CDMX
-  const target = new Date(
-    cdmxNow.getFullYear(),
-    cdmxNow.getMonth(),
-    cdmxNow.getDate(),
-    hour,
-    minute,
-    second
-  );
+  // 2. Aplicar el offset de CDMX (-6 horas desde UTC)
+  let cdmxHour = currentHour - 6;
+  let cdmxDay = day;
+  let cdmxMonth = month;
+  let cdmxYear = year;
   
-  // Si es para el siguiente día, ajusta la fecha
+  // Ajustar si la hora se vuelve negativa (cambio de día hacia atrás)
+  if (cdmxHour < 0) {
+    cdmxHour += 24;
+    const previousDay = new Date(Date.UTC(year, month, day - 1));
+    cdmxDay = previousDay.getUTCDate();
+    cdmxMonth = previousDay.getUTCMonth();
+    cdmxYear = previousDay.getUTCFullYear();
+  }
+  
+  // Crear objeto Date para la hora actual en CDMX
+  const cdmxNow = new Date(Date.UTC(cdmxYear, cdmxMonth, cdmxDay, cdmxHour, currentMinute, currentSecond));
+  
+  // Crear objeto Date para la hora objetivo en CDMX
+  const targetDate = new Date(Date.UTC(cdmxYear, cdmxMonth, cdmxDay, hour, minute, second));
+  
+  // Si es para el siguiente día, ajustar la fecha
   if (isNextDay) {
-    target.setDate(target.getDate() + 1);
+    targetDate.setUTCDate(targetDate.getUTCDate() + 1);
+  } else {
+    // Si la hora objetivo es anterior a la hora actual y no se especificó nextDay,
+    // asumimos que queremos comprobar si ya pasó hoy
+    if (targetDate < cdmxNow) {
+      // Ya pasó hoy
+      return res.status(200).json({ 
+        result: true,
+        current_time: `${cdmxHour}:${currentMinute}:${currentSecond}`,
+        target_time: `${hour}:${minute}:${second}`
+      });
+    }
   }
   
   // Si el tiempo ya pasó, devuelve true
-  if (target <= cdmxNow) {
-    return res.status(200).json({ result: true });
+  if (targetDate <= cdmxNow) {
+    return res.status(200).json({ 
+      result: true,
+      current_time: `${cdmxHour}:${currentMinute}:${currentSecond}`,
+      target_time: `${hour}:${minute}:${second}`
+    });
   } else {
     // Si el tiempo aún no ha llegado, calcula cuánto falta
-    const diff = target - cdmxNow; // Diferencia en milisegundos
+    const diff = targetDate - cdmxNow; // Diferencia en milisegundos
     const remainingSeconds = Math.floor(diff / 1000);
     
     // Calcular componentes de tiempo restante
@@ -92,7 +123,9 @@ export default function handler(req, res) {
     
     return res.status(200).json({
       result: false,
-      remaining: remainingTime
+      remaining: remainingTime,
+      current_time: `${cdmxHour}:${currentMinute}:${currentSecond}`,
+      target_time: `${hour}:${minute}:${second}`
     });
   }
 }
