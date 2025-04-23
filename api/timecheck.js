@@ -13,17 +13,41 @@ export default function handler(req, res) {
     return res.status(400).json({ error: "Parámetro 'time' es requerido" });
   }
   
-  // Verificar el formato de la hora (ahora solo acepta ":" como separador)
-  const match = time.match(/^(\d{1,2}):(\d{1,2}):(\d{1,2})(\/\+1)?$/);
+  // Depuración: verificar el formato que está llegando
+  console.log("Formato recibido:", time);
+  
+  // El problema puede estar en cómo se maneja el caracter '/' en la URL
+  // La expresión regular necesita ser más flexible
+  let nextDay = false;
+  let cleanTime = time;
+  
+  // Comprobar si contiene /+1 en cualquier forma que pueda venir codificado en la URL
+  if (time.includes('/+1') || time.includes('%2F%2B1') || time.includes('%2F+1')) {
+    nextDay = true;
+    // Limpiar el tiempo de cualquier variante de /+1
+    cleanTime = time.replace(/\/\+1|%2F%2B1|%2F\+1/g, '');
+  }
+  
+  // Verificar el formato de la hora básica
+  const match = cleanTime.match(/^(\d{1,2}):(\d{1,2}):(\d{1,2})$/);
   if (!match) {
-    return res.status(400).json({ error: "Formato de tiempo inválido. Use HH:MM:SS o HH:MM:SS/+1" });
+    return res.status(400).json({ 
+      error: "Formato de tiempo inválido. Use HH:MM:SS o HH:MM:SS/+1",
+      receivedTime: time
+    });
   }
   
   // Parsear los componentes de tiempo
   const hour = parseInt(match[1], 10);
   const minute = parseInt(match[2], 10);
   const second = parseInt(match[3], 10);
-  const nextDay = !!match[4];  // Si tiene '/+1', será true, sino false.
+  
+  // Validar los rangos de horas, minutos y segundos
+  if (hour < 0 || hour > 23 || minute < 0 || minute > 59 || second < 0 || second > 59) {
+    return res.status(400).json({ 
+      error: "Valores de tiempo fuera de rango. Horas(0-23), Minutos(0-59), Segundos(0-59)"
+    });
+  }
   
   // Obtener la fecha y hora actual en CDMX (UTC-6)
   const now = new Date();
