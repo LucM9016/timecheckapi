@@ -1,5 +1,5 @@
 export default function handler(req, res) {
-  const { time, key } = req.query;
+  const { time, key, nextDay } = req.query;
   // Lista de claves válidas
   const VALID_KEYS = ["08cKe74qjP1MnDuNYr6cCeOxc71O", "FzE4IhjLpf55JglPkWPJJi4BuKqj", "9016"];
   
@@ -13,26 +13,11 @@ export default function handler(req, res) {
     return res.status(400).json({ error: "Parámetro 'time' es requerido" });
   }
   
-  // Depuración: verificar el formato que está llegando
-  console.log("Formato recibido:", time);
-  
-  // El problema puede estar en cómo se maneja el caracter '/' en la URL
-  // La expresión regular necesita ser más flexible
-  let nextDay = false;
-  let cleanTime = time;
-  
-  // Comprobar si contiene /+1 en cualquier forma que pueda venir codificado en la URL
-  if (time.includes('/+1') || time.includes('%2F%2B1') || time.includes('%2F+1')) {
-    nextDay = true;
-    // Limpiar el tiempo de cualquier variante de /+1
-    cleanTime = time.replace(/\/\+1|%2F%2B1|%2F\+1/g, '');
-  }
-  
-  // Verificar el formato de la hora básica
-  const match = cleanTime.match(/^(\d{1,2}):(\d{1,2}):(\d{1,2})$/);
+  // Verificar el formato de la hora
+  const match = time.match(/^(\d{1,2}):(\d{1,2}):(\d{1,2})$/);
   if (!match) {
     return res.status(400).json({ 
-      error: "Formato de tiempo inválido. Use HH:MM:SS o HH:MM:SS/+1",
+      error: "Formato de tiempo inválido. Use HH:MM:SS",
       receivedTime: time
     });
   }
@@ -48,6 +33,9 @@ export default function handler(req, res) {
       error: "Valores de tiempo fuera de rango. Horas(0-23), Minutos(0-59), Segundos(0-59)"
     });
   }
+  
+  // Comprobar si nextDay está establecido a true (acepta 'true', '1', 'yes')
+  const isNextDay = nextDay === 'true' || nextDay === '1' || nextDay === 'yes';
   
   // Obtener la fecha y hora actual en CDMX (UTC-6)
   const now = new Date();
@@ -71,7 +59,7 @@ export default function handler(req, res) {
   );
   
   // Si es para el siguiente día, ajusta la fecha
-  if (nextDay) {
+  if (isNextDay) {
     target.setDate(target.getDate() + 1);
   }
   
