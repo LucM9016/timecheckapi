@@ -4,14 +4,17 @@ export default function handler(req, res) {
   // Lista de claves válidas
   const VALID_KEYS = ["08cKe74qjP1MnDuNYr6cCeOxc71O", "FzE4IhjLpf55JglPkWPJJi4BuKqj", "9016"];
 
+  // Verificar la clave API
   if (!VALID_KEYS.includes(key)) {
     return res.status(403).json({ error: "Prohibido" });
   }
 
+  // Verificar si la variable 'time' está presente
   if (!time) {
     return res.status(400).json({ result: false });
   }
 
+  // Verificar el formato de la hora
   const match = time.match(/^(\d{1,2}):(\d{1,2}):(\d{1,2})(\/\+1)?$/);
   if (!match) {
     return res.status(400).json({ result: false });
@@ -32,28 +35,22 @@ export default function handler(req, res) {
     second
   );
 
+  // Si el tiempo es del día siguiente, ajusta la fecha
   if (nextDay) {
     target.setDate(target.getDate() + 1);
   }
 
-  console.log(`Current time: ${now}`);
-  console.log(`Target time: ${target}`);
-
   const isFuture = target > now;
 
+  // Si el tiempo ya ha llegado o está por llegar (en el futuro)
   if (isFuture) {
-    return res.status(200).json({ result: true });
-  } else {
-    // Si el tiempo ya pasó, calcula cuánto falta
-    const diff = now - target; // Diferencia en milisegundos
+    // Si el tiempo aún no ha pasado, calcula cuánto falta
+    const diff = target - now; // Diferencia en milisegundos
     const remainingSeconds = Math.abs(diff) / 1000;
     const minutesLeft = Math.floor(remainingSeconds / 60);
     const secondsLeft = Math.floor(remainingSeconds % 60);
     const hoursLeft = Math.floor(remainingSeconds / 3600);
     const daysLeft = Math.floor(remainingSeconds / 86400);
-
-    console.log(`Remaining time in seconds: ${remainingSeconds}`);
-    console.log(`Remaining time (days, hours, minutes, seconds): ${daysLeft} días, ${hoursLeft} horas, ${minutesLeft} minutos y ${secondsLeft} segundos`);
 
     // Generar el mensaje según el tiempo restante
     let remainingTime = '';
@@ -72,5 +69,8 @@ export default function handler(req, res) {
       result: false,
       remaining: remainingTime
     });
+  } else {
+    // Si el tiempo ya pasó
+    return res.status(200).json({ result: true });
   }
 }
