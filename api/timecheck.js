@@ -1,4 +1,4 @@
-export default function handler(req, res) {
+ export default function handler(req, res) {
   const { time, key } = req.query;
 
   // Lista de claves válidas
@@ -40,7 +40,7 @@ export default function handler(req, res) {
     target.setDate(target.getDate() + 1);
   }
 
-  // Si la fecha ya pasó, devuelve true
+  // Si el tiempo ya pasó, devuelve true
   if (target < now) {
     return res.status(200).json({ result: true });
   } else {
