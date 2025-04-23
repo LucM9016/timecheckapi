@@ -1,7 +1,7 @@
 export default function handler(req, res) {
   const { time, key, nextDay } = req.query;
   // Lista de claves válidas
-  const VALID_KEYS = ["08cKe74qjP1MnDuNYr6cCeOxc71O", "FzE4IhjLpf55JglPkWPJJi4BuKqjX", "9016"];
+  const VALID_KEYS = ["08cKe74qjP1MnDuNYr6cCeOxc71O", "FzE4IhjLpf55JglPkWPJJi4BuKqj", "9016"];
   
   // Verificar la clave API
   if (!VALID_KEYS.includes(key)) {
