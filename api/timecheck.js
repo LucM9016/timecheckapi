@@ -6,7 +6,7 @@ export default function handler(req, res) {
 
   // Lista de claves válidas
   const VALID_KEYS = [
-    "08cKe74qjP1MnDuNYr6cCeOxc71O",
+    "08cKe74qjP1MnDuNYr6cCeOxc71Oi",
     "FzE4IhjLpf55JglPkWPJJi4BuKqj",
     "9016"
   ];
